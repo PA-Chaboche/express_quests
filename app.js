@@ -21,9 +21,10 @@ const {
   postUser,
   putUser,
   deleteUser,
+  getUserByEmailWithPasswordAndPassToNext,
 } = require("./usersHandlers");
 
-const { hashPassword } = require("./auth.js");
+const { hashPassword, verifyPassword, verifyToken } = require("./auth.js");
 
 app.get("/api/movies", movieHandlers.getMovies);
 app.get("/api/movies/:id", movieHandlers.getMovieById);
@@ -31,9 +32,12 @@ app.get("/api/users", getUsers);
 app.get("/api/users/:id", getUsersById);
 
 app.post("/api/users", hashPassword, postUser);
+app.post("/api/login", getUserByEmailWithPasswordAndPassToNext, verifyPassword);
+
+app.use(verifyToken);
 
 app.put("/api/users/:id", putUser);
-
+app.post("/api/movies", verifyToken, movieHandlers.createMovie);
 app.delete("/api/users/:id", deleteUser);
 
 app.listen(port, (err) => {

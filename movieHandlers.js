@@ -1,3 +1,4 @@
+const database = require("./database");
 const movieHandlers = require("./movieHandlers");
 
 const movies = [
@@ -48,8 +49,31 @@ const getMovieById = (req, res) => {
       res.status(500).send("Error retrieving data from database");
     });
 };
+const createMovie = (req, res) => {
+  const { title, director, year, color, duration } = req.body;
+  database
+    .query(
+      "INSERT INTO movies (title, director, year, color, duration) VALUES (?, ?, ?, ?, ?)",
+      [title, director, year, color, duration]
+    )
+    .then(([result]) => {
+      res.status(201).json({
+        id: result.insertId,
+        title,
+        director,
+        year,
+        color,
+        duration,
+      });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error saving the user");
+    });
+};
 
 module.exports = {
   getMovies,
   getMovieById,
+  createMovie,
 };
