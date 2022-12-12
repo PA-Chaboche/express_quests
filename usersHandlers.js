@@ -1,7 +1,19 @@
 const database = require("./database");
 
 const getUsers = (req, res) => {
-  database.query("select * from users").then((i) => {
+  let sql = "select firstname, lastname, email, city, language from users";
+  const sqlValues = [];
+
+  if (req.query.language != null) {
+    sql += " where language = ?";
+
+    sqlValues.push(req.query.language);
+  } else if (req.query.city != null) {
+    sql += " where city = ?";
+
+    sqlValues.push(req.query.city);
+  }
+  database.query(sql, sqlValues).then((i) => {
     res.status(200).json(i[0]);
   });
 };
@@ -28,10 +40,11 @@ const getUsersById = (req, res) => {
 };
 
 const postUser = (req, res) => {
-  const { firstname, lastname, email, city, language } = req.body;
+  const { firstname, lastname, email, city, language, hashedPassword } =
+    req.body;
   database
     .query("insert into users set ?", [
-      { firstname, lastname, email, city, language },
+      { firstname, lastname, email, city, language, hashedPassword },
     ])
     .then(([result]) => {
       res.status(201).json({
@@ -41,6 +54,7 @@ const postUser = (req, res) => {
         email,
         city,
         language,
+        hashedPassword,
       });
     })
     .catch((err) => {
@@ -61,9 +75,32 @@ const putUser = (req, res) => {
     });
 };
 
+const deleteUser = (req, res) => {
+  const id = parseInt(req.params.id);
+
+  database
+
+    .query("delete from users where id = ?", [id])
+
+    .then(([result]) => {
+      if (result.affectedRows === 0) {
+        res.status(404).send("Not Found");
+      } else {
+        res.sendStatus(204);
+      }
+    })
+
+    .catch((err) => {
+      console.error(err);
+
+      res.status(500).send("Error deleting the user");
+    });
+};
+
 module.exports = {
   getUsers,
   getUsersById,
   postUser,
   putUser,
+  deleteUser,
 };

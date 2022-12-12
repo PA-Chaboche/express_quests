@@ -20,16 +20,21 @@ const {
   getUsersById,
   postUser,
   putUser,
+  deleteUser,
 } = require("./usersHandlers");
+
+const { hashPassword } = require("./auth.js");
 
 app.get("/api/movies", movieHandlers.getMovies);
 app.get("/api/movies/:id", movieHandlers.getMovieById);
 app.get("/api/users", getUsers);
 app.get("/api/users/:id", getUsersById);
 
-app.post("/api/users", postUser);
+app.post("/api/users", hashPassword, postUser);
 
 app.put("/api/users/:id", putUser);
+
+app.delete("/api/users/:id", deleteUser);
 
 app.listen(port, (err) => {
   if (err) {
